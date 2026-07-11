@@ -6,7 +6,7 @@ Public binary releases for [RTR CLI](https://github.com/suncanyon/rtr).
 
 ```sh
 # Shell installer (macOS & Linux)
-curl -fsSL https://install-rtr.ext.suncanyontech.com/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/suncanyon/rtr-releases/main/install.sh | sh
 
 # Homebrew
 brew install suncanyon/rtr/rtr

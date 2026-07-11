@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # RTR CLI installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/suncanyon/rtr-releases/main/install.sh | sh
+# Usage: curl -fsSL https://install-rtr.ext.suncanyontech.com/install.sh | sh
 #
 # Installs the `rtr` binary to /usr/local/bin (or ~/bin if not writable).
 # One binary — contains both the CLI and the embedded proxy daemon.
@@ -127,20 +127,33 @@ fi
 # Extract
 tar -xzf "${TMP_DIR}/${ARCHIVE}" -C "${TMP_DIR}"
 
-# Install
+# Install — unlink first so upgrades succeed even while the proxy daemon is running.
+# rm on a running binary is safe on Linux/macOS: the kernel keeps the old inode
+# alive until the last fd closes; the new file gets a fresh inode at the same path.
+install_binary() {
+    TARGET_DIR="$1"
+    USE_SUDO="$2"
+
+    if [ "$USE_SUDO" = "yes" ]; then
+        sudo rm -f "${TARGET_DIR}/${BINARY_NAME}"
+        sudo cp "${TMP_DIR}/${BINARY_NAME}" "${TARGET_DIR}/${BINARY_NAME}"
+        sudo chmod +x "${TARGET_DIR}/${BINARY_NAME}"
+    else
+        rm -f "${TARGET_DIR}/${BINARY_NAME}"
+        cp "${TMP_DIR}/${BINARY_NAME}" "${TARGET_DIR}/${BINARY_NAME}"
+        chmod +x "${TARGET_DIR}/${BINARY_NAME}"
+    fi
+}
+
 if [ -w "$INSTALL_DIR" ]; then
-    cp "${TMP_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-    chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
+    install_binary "$INSTALL_DIR" no
     INSTALLED_TO="${INSTALL_DIR}/${BINARY_NAME}"
 elif command -v sudo >/dev/null 2>&1; then
-    sudo cp "${TMP_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-    sudo chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
+    install_binary "$INSTALL_DIR" yes
     INSTALLED_TO="${INSTALL_DIR}/${BINARY_NAME}"
 else
-    # Fall back to ~/bin
     mkdir -p "$HOME/bin"
-    cp "${TMP_DIR}/${BINARY_NAME}" "$HOME/bin/${BINARY_NAME}"
-    chmod +x "$HOME/bin/${BINARY_NAME}"
+    install_binary "$HOME/bin" no
     INSTALLED_TO="$HOME/bin/${BINARY_NAME}"
     echo ""
     echo "Installed to ~/bin — make sure ~/bin is in your PATH:"

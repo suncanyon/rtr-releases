@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # RTR CLI installer
-# Usage: curl -fsSL https://install-rtr.ext.suncanyontech.com/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/suncanyon/rtr-releases/main/install.sh | sh
 #
 # Installs the `rtr` binary to /usr/local/bin (or ~/bin if not writable).
 # One binary — contains both the CLI and the embedded proxy daemon.
